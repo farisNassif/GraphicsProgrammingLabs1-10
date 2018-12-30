@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Lab One Canvas</title>
+    <style type="text/css">
+	#canvasOne
+		{
+			border:5px solid black;
+			<!-- Giving the canvas a black border that is 5 pixels thick -->
+		}	
+    </style>
+  </head>
+  <body>
+	<!-- Canvas Initilization -->
+    <canvas id="canvasOne" width="600px" height="300px"></canvas>
+    <script type="text/javascript">
+	
+		// Gets a handle to the element with id canvasOne.
+		var canvas = document.getElementById("canvasOne");
+		// Set the canvas up for drawing in 2D.
+		var ctx = canvas.getContext("2d");
+		// x & y pos of Pac-Man inside the function
+		var x = 20;
+		var y = 280;
+		var blueCircleX = 450;
+		var pacmanRadius = 20;
+		// This is the percent that the mouth of Pac-Man is open
+		var pOpen = 100;
+		// This is the offset that will be added to pOpen each time the Pac-Man is redrawn
+		var direction = -10;
+		// First Rectangle with a fill colour of orange that is overlapping the lime coloured rectangle by 15 pixels & ctx.rect acting as the black border to the fillStyle which holds the red colour
+		ctx.fillStyle = "rgba(255,69,0,0.5)";
+		ctx.rect(10, 30, 175, 100);
+		ctx.fillRect(10, 30, 175, 100);
+		// Second rectangle 
+		ctx.fillStyle = "rgba(0,255,0,0.5)";
+		ctx.rect(10, 115, 175, 100);
+		ctx.fillRect(10, 115, 175, 100);
+		ctx.stroke();
+		
+		// Apply the text to the top left of the canvas at position 10(X) and 25(Y) and assign the Courier font to the text
+		ctx.font = "20px Courier";
+		ctx.strokeText("Faris Nassif - Lab One",10,20);
+		
+		// This is the rectangle(square) that will have the circle inside of it. The dimentions are pretty much just x - the circle radius and y - the circle radius 
+		ctx.rect(400,20,100,100);
+		ctx.stroke();
+
+		// Drawing the first circle and making it red (The circle that will have the rectangle around it)
+		ctx.fillStyle = "#c82124";
+		ctx.beginPath();
+		ctx.arc(450,70,50,0,2*Math.PI);
+		ctx.stroke();
+		ctx.fill();
+		// Drawing the second circle and making it blue 
+		ctx.fillStyle = "#0000FF";
+		ctx.beginPath();
+		ctx.arc(blueCircleX,200,50,0,2*Math.PI);
+		ctx.stroke();
+		ctx.fill();
+		// Drawing the third circle and making it purple
+		ctx.fillStyle = "#8a2be2";
+		ctx.beginPath();
+		ctx.arc(340,145,50,0,2*Math.PI);
+		ctx.stroke();
+		ctx.fill();
+		
+		// Calls the moveObject() function which creates the Pac-Man & animates him at an interval of 0.15 seconds
+		setInterval(function() {
+		// Passing the percentage his mouth is open + direction (which is -10)
+		moveObject(pOpen += direction);
+			// When the mouth reaches its limit reverse the direction
+			if (pOpen % 100 == 0)
+				{
+					// If direction was previously a + reverse it and now make it a -
+					direction = -direction;
+				}
+		}, 15);
+		
+		// Calls the moveObject50Px() which will move the blue circle 50 pixels to the right each execution
+		setInterval(function() {
+		moveObject50Px();
+		// Every 3 seconds (3000 ms) this will execute
+		}, 3000);
+		
+	function moveObject50Px()
+	{
+		// Updates the variable so the circle may be drawn 50 pixels to the right
+		blueCircleX += 50;
+		if (blueCircleX == 600)
+			{	
+				// Once the circle hits the wall it will reset back to it's original position
+				blueCircleX = 450;
+			}
+		// Clears the previously created blue circle that should be moving at 50px per 3 seconds
+		ctx.clearRect(399, 149, 600, 300);
+		
+		// Re-creates the blue circle at xPos + 50
+		ctx.fillStyle = "#0000FF";
+		ctx.beginPath();
+		ctx.arc(blueCircleX,200,50,0,2*Math.PI);
+		ctx.stroke();
+		ctx.fill();	
+	}
+	
+	function moveObject(pOpen) 
+		{		
+			// Each time this line is hit it store a new value in ** that will cause the angle at which Pac-Man's upper and lower mouth are drawn, eventaully they will meet in the middle.
+			var pOpenDivided = pOpen / 100;
+			// Clear the position x(0) and y(255) and match the width and height of the canvas
+			ctx.clearRect(0, 255, canvas.width, canvas.height);
+			// Pac-Man
+			ctx.beginPath();
+			// The arc stops at a specific percent to allow for the open mouth to be drawn
+			ctx.arc(x, y, pacmanRadius, (pOpenDivided * 0.2) * Math.PI, (2 - pOpenDivided * 0.2) * Math.PI,false);	
+			// The line leading back to the center and then closing the path to finish the open mouth
+			ctx.lineTo(x, y);
+			ctx.closePath();
+			// Colour Pac-Man yellow
+			ctx.fillStyle = "#f7df1e";
+			ctx.fill();
+			// Black/Stroke Outline
+			ctx.stroke();
+			// Pac-Man will move at 2 pixels to the right (x-axis) each time this function is entered 
+			x += 2;
+			// Pac-Man's eye
+			ctx.beginPath();
+			ctx.arc(x, 268, 4, 0, 2 * Math.PI);
+			ctx.fillStyle = "rgb(0,0,0)";
+			ctx.fill();  
+			
+			// If the moving x position collides with the max width of the canvas 
+			if(x > (600 - pacmanRadius))
+			{
+				// Resetting the value of x back to 20, what it was initialized as
+				x = 20;
+			}
+			// Animate function
+			//requestAnimationFrame(moveObject);
+		} // moveObject()
+    </script>
+  </body>
+</html>

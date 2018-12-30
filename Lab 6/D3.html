@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<head>
+    <title>D3.js Demo</title>
+    <meta charset="UTF-8">
+    <style type="text/css"></style>
+	
+</head>
+
+<body>
+    <script type="text/javascript">
+		// Get JSON data
+        $.getJSON("https://jsonblob.com/api/60b035d5-d579-11e8-a295-3724bafc7173", function (data) {
+			// Console logging all data in the json package
+            console.log(data);
+			// Plotting the data in the function below
+            plotCurrencyData(data);
+        });
+
+        // Plots lines on the graph
+        function plotCurrencyData(data) {
+            // Graph position, width and length
+            var margin = { top: 50, right: 50, bottom: 50, left: 150},
+                width = 1600 - margin.left - margin.right,
+                height = 670 - margin.top - margin.bottom;
+
+			// Returns y axis values needed for the graph
+            var y = d3.scaleLinear()
+                .domain(d3.extent(data, function (d) { return d["GBP/EUR"] }))
+                .range([height, 0]);
+			// For the date that will be used in the graph
+            var parseDate = d3.timeParse("%d/%m/%Y");
+
+			// Returns x axis values needed for the graph
+            var x = d3.scaleTime()
+                .domain(d3.extent(data, function (d) { return parseDate(d["Date"]); }))
+                .range([0, width]);
+
+            var xAxis = d3.axisBottom(x).ticks(30)
+            var yAxis = d3.axisLeft(y).ticks(30);
+
+            var valueLine = d3.line()
+                .x(function (d) { return x(parseDate(d["Date"])); })
+                .y(function (d) { return y(d["GBP/EUR"]); });
+
+            var svg = d3.select('body')
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+			// The line for the X axis
+            svg.append('g')
+                .attr('class', 'x axis')
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+			// The line for the Y axis
+            svg.append('g')
+                .attr('class', 'y axis')
+                .call(yAxis);
+				
+			// Text label for the X axis
+			svg.append("text")      
+				.attr("x", 760 )
+				.attr("y",  610)
+				.style("text-anchor", "middle")
+				.text("Dates");
+				
+			// Text label for the Y axis
+			svg.append("text")   
+				.attr("x", -70 )
+				.attr("y",  250 )
+				.style("text-anchor", "middle")
+				.text("Currency");
+
+			// Graph lines mapped according to data
+            svg.append("path")
+                .attr("d", valueLine(data))
+                .attr("fill", "none")
+                .attr("stroke", "blue");
+        }
+    </script>
+
+</body>
+
+</html>

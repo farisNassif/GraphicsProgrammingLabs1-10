@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html>
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+  <head>
+    <title>Canvas</title>
+	<h1 >&nbsp;Faris Nassif <h1> 
+  </head>
+      <style type="text/css">
+		#bouncyBall
+		{
+			border:5px solid black;
+		}
+    </style>
+  <body style = "background-color:white">
+		<canvas id = "bouncyBall" width = "600" height = "500"
+		style = "border-style:inset;background-color:
+		white; border-width:5px;" >
+		</canvas>	
+   <script type="text/javascript">
+   	var content = document.getElementById("bouncyBall");
+	var ctx = content.getContext("2d");
+
+	// keypress switch
+	$(document.body).on('keydown', function(e) {
+		switch (e.which) {
+		// key code for left arrow
+		case 37:
+			ballA.xVelocity--;
+			break;
+		// key code for right arrow
+		case 39:
+			ballA.xVelocity++;
+			break;
+		// key code for up arrow
+		case 38:
+			ballA.yVelocity--;
+			break;
+		// key code for down arrow
+		case 40:
+			ballA.yVelocity++;
+			break;
+		// key code for r 'spin'
+		case 82:
+			// This causes the ball to 'spin' clockwise
+			ballA.rotationSpeed += 1;
+			break;
+		// key code for t 'spin'
+		case 84:
+			// This causes the ball to 'spin' anti clockwise
+			ballA.rotationSpeed -= 1;
+			break;
+		}
+	});
+	
+	// This function handles mouseclicks, and should redraw the ball at the clicked position
+    content.addEventListener("click", function(event) { 
+		var centerX = event.clientX - content.offsetLeft;
+		var centerY = event.clientY - content.offsetTop;
+		// Whenever User clicks ball will be moved to the clicked position
+		ballA.centerX = centerX;
+		ballA.centerY = centerY;
+    });
+		
+  class Ball{
+	  constructor(centerX,centerY){
+		// The x & y pos of the instantiated ball
+		this.centerY = centerY;
+		this.centerX = centerX;
+		// Speed of the ball
+		this.yVelocity=2;
+		this.xVelocity=3;
+		// Used to draw lines
+		this.angleForLine=0;
+		// Used as a true/false condition for when the ball hits walls to spin
+		this.clockwiseSpin=1;
+		this.radius=35;
+		// How fast the ball rotates
+		this.rotationSpeed=1;
+		// Wasn't able to get collision part of the lab done, had issues implementing code from the lecture notes
+		this.mass = 1;
+	  }
+	  
+	  drawbeachball(color) {
+		//Circle Drawn
+        ctx.beginPath();
+        ctx.arc(this.centerX, this.centerY, this.radius, 0, 2 * Math.PI);
+		ctx.lineWidth = "1.5";
+		ctx.fillStyle = color;
+		ctx.fill();
+        ctx.stroke();
+		
+		//This is just drawing the inner circle on the beachball
+		ctx.beginPath();
+		ctx.arc(this.centerX ,this.centerY, (this.radius/1.2), 0, 2 * Math.PI, false);	
+		ctx.fill();
+		ctx.stroke();
+		ctx.closePath();
+		
+		// This just causes the ball to rotate clockwise/anti clockwise upon collision with the canvas
+		if(this.clockwiseSpin>0)
+		{
+			this.angleForLine+=this.rotationSpeed*Math.PI/180;
+		}x
+		else 
+		{
+			this.angleForLine-=this.rotationSpeed*Math.PI/180;
+		}
+		
+		// This loop with draw all the lines within the ball with i being incremented by 2 each loop to get the correct angle at which to draw the line
+		for (var i = 2 ; i <=14;)
+			{
+				ctx.beginPath();
+				ctx.moveTo(this.centerX,this.centerY);
+				ctx.lineTo(this.centerX+(this.radius*Math.cos((i*Math.PI/7)+this.angleForLine)),this.centerY+(this.radius*Math.sin((i*Math.PI/7)+this.angleForLine)));
+				ctx.stroke();
+				i = i + 2;		
+			}
+
+	  }
+		moveball()
+		{
+			// This is incrementing the position/center of the ball by the x & y velocity  
+			this.centerY += this.yVelocity;
+			this.centerX += this.xVelocity;
+			
+			if(this.centerX>content.width - this.radius || this.centerX < this.radius)
+			{
+				this.xVelocity*=-1;	
+				this.clockwiseSpin*=-1;
+			}
+			// This is pretty much just saying it it hits off the top or bottom of the canvas invert the velocity so if it's 3 and then hits the bottom it becomes -3 and vice versa
+			if(this.centerY > content.height - this.radius || this.centerY < this.radius)
+			{
+				this.yVelocity*=-1;
+				this.clockwiseSpin*=+1;
+			}
+		}
+		<!-- bounceBall(acceleration) -->
+		<!-- {	 -->
+			
+			<!-- this.acceleration = acceleration; -->
+			<!-- this.centerY += this.yVelocity ; -->
+			
+			<!-- if(this.centerY > content.height - this.radius || this.centerY < this.radius) -->
+			<!-- { -->
+				<!-- this.yVelocity*=-1; -->
+				<!-- console.log(this.acceleration); -->
+			<!-- } -->
+		<!-- } -->
+	}//ball class
+	
+	// Ball is instanciated after class creation with (xpos, ypos)
+	var ballA = new Ball(55,155); 
+	var ballB = new Ball(350,125);
+
+	function repeatme() 
+	{
+		// Clears the canvas each time this is executed
+		ctx.clearRect(0, 0, content.width, content.height); 
+		// Calling .drawbeachball() and .moveball() to both draw the ball as a beachball and move it accordingly each time this function is executed
+		ballA.drawbeachball("orange");
+		ballA.moveball();
+		ballB.drawbeachball("red");
+		ballB.moveball();
+		//console.log(((ballB.centerX - ballA.centerX)*2) + ((ballA.centerY - ballB.centerY)*2));
+        window.requestAnimationFrame(repeatme);
+    }
+	// repeatme() function gets executed 
+	repeatme();
+     </script>
+  </body>
+</html>

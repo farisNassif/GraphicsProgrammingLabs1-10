@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>3D three.js graphic</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>	
+		<script src="http://threejs.org/build/three.min.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			// Just used this in creation of the sphere
+			var radius = 3;
+			// 50 = view angle | aspect = innerwidth/innerheight | 2 = min distance from camera the three.js renders the scene | 1000 = max distance we see the scene from the position of the camera
+			var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 2, 1000);
+			var renderer = new THREE.WebGLRenderer();
+			// Used at a later point to create the sphere
+			var geometry = new THREE.SphereGeometry( 60,25, 0);
+			// Used at a later point to create the plane
+			var planeGeometry = new THREE.PlaneGeometry( innerWidth * 0.5, innerHeight * 0.5, 10, 10);
+			// Material the sphere is constructed with, giving wireframe the value of true
+			var material = new THREE.MeshLambertMaterial( {color: 0xFF00FF, wireframe: false});
+			// Creating the plane using the planeGeometry var above and assigning it a color
+			var plane = new THREE.Mesh( planeGeometry, new THREE.MeshPhongMaterial({ color: "brown" }));
+			// Creating the sphere using the geometry var above
+			var sphere = new THREE.Mesh( geometry, material );
+			// xPos is assigned a value that is the same as the furthest left point on the plane. It's used to bounce the sphere
+			var xPos = -455;
+			var zPos = -150;
+			var yPos = -195;
+			// For the overlap/wireframe part
+			var materialTWO = new THREE.LineBasicMaterial( {color:"orange", linewidth:2} );
+			var geometryTWO = new THREE.EdgesGeometry(sphere.geometry);
+			var wireframe = new THREE.LineSegments(geometryTWO, materialTWO);
+			// Boolean used to bounche the ball below in the if statement within animateFrame
+			var atBottom = false;
+			var atLeft = false;
+			// Spotlight for shadow initialized
+			var spotLight = new THREE.SpotLight( 0xffffff );
+			//var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+			var helper = new THREE.CameraHelper( spotLight.shadow.camera );
+			var text2 = document.createElement('div');
+			var text3 = document.createElement('div');
+			// Taking this out would make the objects not render
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+			// Just saying the sphere should cast a shadow
+			sphere.castShadow = true;
+			// Required for shadow projection
+			renderer.shadowMap.enabled = true;
+			// Setting up the position the camera will take. It's kinda far but my plane is big so it needs to be pretty far away
+			camera.position.set(0,700,300);
+			// This flips the camera so it's not upside down
+			camera.up = new THREE.Vector3(0,0,1);
+			// Used with the above line to correctly position the camera
+			camera.lookAt(new THREE.Vector3(0,0,0));
+			// Setting the spotlight to the default position
+			spotLight.position.set(0, 0, 0);
+			// Making the light cast shadows
+			spotLight.castShadow = true;
+			// These position values are just used to line up the plane/sphere and camera so everything is captured
+			sphere.position.z = -150;
+			plane.position.z = -200;
+			spotLight.position.z = 250;
+			
+			// Text used to display X & Y Positions
+			text2.style.position = 'absolute';
+			text2.style.width = 100;
+			text2.style.height = 100;
+			text2.style.top = 650 + 'px';
+			text2.style.left = 900	 + 'px';
+			document.body.appendChild(text2);
+			text3.style.position = 'absolute';
+			text3.style.width = 100;
+			text3.style.height = 100;
+			text3.style.top = 620 + 'px';
+			text3.style.left = 900	 + 'px';
+			document.body.appendChild(text3);
+			// Telling the plane to receive shadows 
+			plane.receiveShadow = true;
+		
+			// Creating stuff
+			scene.add( spotLight );
+			scene.add( plane );
+			scene.add( sphere );
+			scene.add( camera );
+			scene.add( helper );
+			sphere.add( wireframe );
+			// Loop function
+			var animateFrame = function() {
+				// Rotates the sphere object
+				text2.innerHTML = "Y Position: " + yPos;
+				text3.innerHTML = "X Position: " + xPos ;
+				sphere.rotateX(Math.PI/180);
+				sphere.rotateY(Math.PI/180);
+				// Reassigning the spheres pos each time this executes depending on whethere atBottom is true or false
+				sphere.position.x = xPos;	
+				sphere.position.z = zPos;
+				sphere.position.y = yPos;
+				// When the sphere reaches the bottom most point of the plane set atBottom to true
+				if (yPos == 195)
+				{
+					atBottom = true;
+				}
+				// When the sphere reaches the top most point of the plance set atBottom to false
+				if (yPos == -190)
+				{
+					atBottom = false;
+				}
+				// Same deal with above
+				if (xPos == -420)
+				{
+					atLeft = false;
+					console.log("it hit off right last");
+				}
+				if (xPos == 460)
+				{
+					atLeft = true;
+					console.log("it hit off left last");
+				}
+				// If atBottom is true (meaning it hit of the bottom most point of the plane more recently than it hit off the top) move up 5 pixels 
+				// It will execute until it hits the top most point at which point atBottom will be false and it will go into the else below this if
+				if (atBottom == true)
+				{
+					yPos-=5;
+						if(atLeft==true)
+						{
+							xPos-=5;
+						}
+						if(atLeft==false)
+						{
+							xPos+=5;
+						}
+				}
+				else
+				{
+					yPos+=5;
+						if(atLeft==true)
+						{
+							xPos-=5;
+						}
+						if(atLeft==false)
+						{
+							xPos+=5;
+						}
+				}
+				// Renders the scene & sets up the camera
+				renderer.render(scene,camera);
+				// Animates the scene
+				requestAnimationFrame(animateFrame);
+				// Changes the colour of the sphere with an offset of 0.005
+				sphere.material.color.offsetHSL(0.005,0,0);
+			};
+			// Calls loop
+			animateFrame();	
+		</script>
+	</body>
+</html>
